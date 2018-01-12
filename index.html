@@ -9,8 +9,16 @@
         <h1>Communication avec socket.io !</h1>
 
         <script src="/socket.io/socket.io.js"></script>
+		<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+		<p><input type="button" value="Embêter le serveur" id="poke" /></p>
         <script>
             var socket = io.connect('http://localhost:8080');
+			    socket.on('message', function(message) {
+					alert('Le serveur a un message pour vous : ' + message);
+				})
+				$('#poke').click(function () {
+                socket.emit('message', 'Salut serveur, ça va ?');
+            })
         </script>
     </body>
 </html>
