@@ -10,14 +10,16 @@
 
         <script src="/socket.io/socket.io.js"></script>
 		<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+		<script src='https://cdn.rawgit.com/admsev/jquery-play-sound/master/jquery.playSound.js'></script>
 
 		<form action="/" method="post" id="formulaire_chat">
             <input type="text" name="message" id="message" placeholder="Votre message..." size="50" autofocus />
             <input type="submit" id="envoi_message" value="Envoyer" />
         </form>
-		
+
         <script>
 		
+			var sounds = ["http://noproblo.dayjo.org/ZeldaSounds/OOT/OOT_Navi_Hello1.wav","http://noproblo.dayjo.org/ZeldaSounds/OOT/OOT_Navi_Hey1.wav","http://noproblo.dayjo.org/ZeldaSounds/OOT/OOT_Navi_Listen1.wav","http://noproblo.dayjo.org/ZeldaSounds/OOT/OOT_Navi_WatchOut1.wav"];
             var socket = io.connect('http://localhost:8080');
 			
 			var pseudo = prompt('Quel est votre pseudo ?');
@@ -28,6 +30,9 @@
 			}
 			function addMessage(message){
 				$('#myTable > tbody:last-child').prepend('<tr><td>'+message.pseudo+': </td><td>'+message.message+'</td></tr>');
+				var position = Math.floor((Math.random() * sounds.length));;
+
+				$.playSound(sounds[position]);
 			}
 			function addPseudo(pseudo){
 				$('#myTable > tbody:last-child').prepend('<tr><td style="color:green"> New client: </td><td>'+pseudo+'</td></tr>');
@@ -45,7 +50,7 @@
 				port = message;
 				console.log('portFast'+message);
 			})
-			socket.on('message', function(message) {
+			socket.on('message', function(message) {				
 				addMessage(message);
 				console.log('receving message'+message);
 			})

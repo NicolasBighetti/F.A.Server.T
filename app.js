@@ -20,6 +20,8 @@ var server = http.createServer(function(req, res) {
 // Chargement de socket.io
 var io = require('socket.io').listen(server);
 // io.use(ios(session));
+var p2p = require('socket.io-p2p-server').Server;
+io.use(p2p);
 
 var clients = [];
 var portFast = 1000;
@@ -66,6 +68,10 @@ io.sockets.on('connection', function (socket) {
 	socket.on('disconnect', function (message) {
 		console.log('disconnect '+ socket.pseudo + ' ;mess ' +message);
 
+		disconnectClient(socket.pseudo);
+    });
+	socket.on('peer-obj', function (message) {
+		console.log('peer ' + message);
 		disconnectClient(socket.pseudo);
     });
 	socket.on('connectTo',function(pseudo){
