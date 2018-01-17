@@ -33,14 +33,14 @@ function getIp(socket){
 // Quand un client se connecte, on le note dans la console
 io.sockets.on('connection', function (socket) {
     console.log('Un client est connecté !');
-	
+
 
 	socket.on('message', function (message) {
 		var mess = {'pseudo':socket.pseudo,'message':message}
         console.log('brodcasting message'+socket.pseudo + ' : ' + message);
 		socket.broadcast.emit('message', mess);
     });
-	
+
 	socket.on('login', function (pseudi){
 		console.log('Login '+pseudi);
         socket.pseudo = pseudi;
@@ -51,19 +51,23 @@ io.sockets.on('connection', function (socket) {
 
 		socket.broadcast.emit('clientConnect', pseudi);
 		console.log('login of'+socket.pseudo);
-    });	
-	
+    });
+
 	function disconnectClient(pseudo){
 		socket.broadcast.emit('clientDisconnect', socket.pseudo);
 		clients[socket.pseudo]=null;
         socket.pseudo = null;
 	}
-	
+
 	socket.on('unlogin', function (message) {
 		console.log('Unlogin '+ socket.pseudo + ' ;mess ' + message);
 		disconnectClient(socket.pseudo);
-    });	
-	
+    });
+
+
+        socket.on('FAST_EVENT_BROADCAST', function(data){
+            socket.broadcast.emit('FAST_EVENT_BROADCAST', data);
+        })
 
 	socket.on('disconnect', function (message) {
 		console.log('disconnect '+ socket.pseudo + ' ;mess ' +message);
