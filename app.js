@@ -2,17 +2,17 @@ var http = require('http');
 var fs = require('fs');
 
 // app.js
-var express = require('express');  
-var app = express();  
-var server = require('http').createServer(app);  
+var express = require('express');
+var app = express();
+var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 
-app.use(express.static(__dirname + '/public'));  
-app.get('/', function(req, res,next) {  
+app.use(express.static(__dirname + '/public'));
+app.get('/', function(req, res,next) {
     res.sendFile(__dirname + '/public/index.html');
 });
 
-server.listen(8080);  
+server.listen(8080);
 
 io.on('connection', function (socket) {
   socket.emit('news', { hello: 'world' });
@@ -20,7 +20,7 @@ io.on('connection', function (socket) {
     console.log(data);
   });
 });
-      
+
 // respond with "hello world" when a GET request is made to the homepage
 app.get('/', function(req, res) {
   res.send('hello world');
@@ -102,7 +102,7 @@ io.sockets.on('connection', function (socket) {
 		socket.broadcast.emit('clientConnect', pseudi);
 		console.log('login of'+socket.pseudo);
     });
-	
+
 	function disconnectClient(pseudo){
 		socket.broadcast.emit('clientDisconnect', socket.pseudo);
 		clients[socket.pseudo]=null;
@@ -148,7 +148,7 @@ io.sockets.on('connection', function (socket) {
   });
 
 	// FAST Protocol
-	
+
 	// TABLE_CONNECT
 	socket.on('FAST_TABLE_CONNECT',function(none){
 		console.log("TABLE_CONNECT");
@@ -156,18 +156,18 @@ io.sockets.on('connection', function (socket) {
 		tableSocket = socket;
 		socket.emit('FAST_TABLE_CONNECT', tableID);
 	});
-	
+
 	// FAST_COLOR
 	socket.on('FAST_COLOR',function(none){
 		console.log("FAST_COLOR");
 		socket.broadcast.emit('FAST_COLOR', none);
 
 	});
-	
+
 	socket.on('FAST_PHONE_CONNECT',function(object){
 		console.log('FAST_PHONE_CONNECT');
 		console.log(object);
-		
+
 		if(tableSocket==socket){
 			console.log("table connect");
 			// from table
@@ -201,7 +201,7 @@ io.sockets.on('connection', function (socket) {
 				console.log('not found');
 				return;
 			}
-			
+
 
 			console.log("ok");
 			socket.emit('FAST_PHONE_CONNECT', foundP);
@@ -216,7 +216,7 @@ io.sockets.on('connection', function (socket) {
 
 			}
 			//socket.broadcast.emit('FAST_PHONE_CONNECT', foundP);
-			
+
 			// else{
 				// console.log("ok");
 				// var bad = {OK:false};
@@ -225,7 +225,36 @@ io.sockets.on('connection', function (socket) {
 			// }
 		}
 	});
+  //Mini Game and some stuff
+
 });
+
+function startFastFire(nbPlayer){
+  var teams = [
+    {FAST_GAME_FIRE_RED: getRandomInt(8,10)},
+    {FAST_GAME_FIRE_BLUE: getRandomInt(8,10)},
+    {FAST_GAME_FIRE_GREEN: getRandomInt(8,10)},
+    {FAST_GAME_FIRE_PURPLE: getRandomInt(8,10)}
+  ];
+
+  var color = [
+    'purple',
+    'green',
+    'blue',
+    'red'
+  ];
+
+  var datas = [];
+
+  for(i = 0; i < nbPlayer; i++){
+    datas[i]= [
+      teams.slice(0,3),
+      {'color': color.pop()}
+    ]
+  }
+
+  //TODO : send to client
+}
 
 function findPlayer(id,socket){
 	var found = 0;
@@ -285,8 +314,10 @@ function createPlayer(){
 	console.log("created player");
 	console.log(object);
 	players.push(object);
-			
-}
 
+}
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 console.log('Listening to 8080');
 server.listen(8080);
