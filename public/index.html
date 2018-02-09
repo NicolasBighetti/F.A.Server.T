@@ -166,11 +166,14 @@
 
         function startCount() {
             var toEncode = ipToIntArray(mess);
-            console.log(toEncode);
+           
             if (!sendMessage) {
 
                 toEncode = dataAsInt;
             }
+            console.log("toEncode");
+            console.log(toEncode);
+
             encodeIp(toEncode);
             if (!timer_is_on) {
                 timer_is_on = 1;
@@ -216,8 +219,8 @@
 
 
         //server ip default to encode
-        //var ip = "192.168.1.50";
-        var ip = "10.212.115.16";
+        var ip = "192.168.1.4";
+        //var ip = "10.212.115.16";
 
         var socket = io.connect('http://' + ip + ':8080');
 
@@ -232,7 +235,8 @@
             var FastKey = ip.substring(0, 4).split('');
             // 4 char to 1, 2, 3, 4
             for (var i = 0; i < FastKey.length ; i++) {
-                keystr[i]= FastKey[i].charCodeAt(0);
+                keystr[i] = FastKey[i].charCodeAt(0);
+                console.log("char " + keystr[i]);
             }
             return keystr;
         }
