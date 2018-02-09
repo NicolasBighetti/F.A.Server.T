@@ -267,6 +267,11 @@ function startMeteor(playerSocket){
   playerSocket.emit('FAST_GAME_METEOR');
 }
 
+function startMinigame(players){
+  for(i = 0; i < players.length; i++){
+    players[i].emit('FAST_PRIVATE_START');
+  }
+}
 
 
 function findPlayer(id,socket){
