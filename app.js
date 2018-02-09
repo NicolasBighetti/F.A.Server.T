@@ -40,6 +40,9 @@ var tableSocket;
 
 var players = [];
 var playerIndex=0;
+var playerIndexPhone=0;
+
+
 var colors = [{color:"#f4f142",text:"jaune"},
 {color:"#4286f4",text:"bleu"},
 {color:"#edb11a",text:"orange"},
@@ -173,7 +176,7 @@ io.sockets.on('connection', function (socket) {
 		}
 		else{
 			createPlayer();
-			var foundP = findPlayer(object.ATOM_PHONE_ID,socket);
+			var foundP = findPlayer(object.COLOR,socket);
 			// for(var i=0;i<players.length;i++){
 				// if(!players[i].PHONE_CONNECTED){
 					// console.log("Found player not connected");
@@ -189,9 +192,10 @@ io.sockets.on('connection', function (socket) {
 				// }
 			// }
 			if(foundP == undefined){
-				createPlayer();
-				foundP = findPlayer(object.ATOM_PHONE_ID,socket);
-
+				//createPlayer();
+				//foundP = findPlayer(object.ATOM_PHONE_ID,socket);
+				console.log('not found');
+				return;
 			}
 			
 
@@ -202,6 +206,11 @@ io.sockets.on('connection', function (socket) {
 				tableSocket.emit('FAST_PHONE_CONNECT', foundP);
 			else
 				console.log("table not connected");
+			if(playerIndexPhone===4){
+                if(tableSocket!=null)
+                    tableSocket.emit('FAST_PHONE_OK', foundP);
+
+			}
 			//socket.broadcast.emit('FAST_PHONE_CONNECT', foundP);
 			
 			// else{
@@ -215,21 +224,50 @@ io.sockets.on('connection', function (socket) {
 });
 
 function findPlayer(id,socket){
+	var found = 0;
 	for(var i=0;i<players.length;i++){
 		if(!players[i].PHONE_CONNECTED){
-			console.log("Found player not connected");
-			console.log(players[i]);
-		//if(players[i].ATOM_PHONE_ID==object.ATOM_PHONE_ID){
-			//players[i].socket = socket;
-			players[i].PHONE_CONNECTED = true;
-			players[i].OK = true;
-			socket.player = players[i];
-			foundP = players[i];
-			found = true;
-			return  players[i];
-			break;
+            console.log("Found player not connected");
+            console.log(players[i]);
+
+            if(players[i].ATOM_PHONE_ID==id){
+				console.log('match id');
+                players[i].PHONE_CONNECTED = true;
+                players[i].OK = true;
+                socket.player = players[i];
+                playerIndexPhone++;
+                return  players[i];
+
+            } else
+			{
+				console.log('no match');
+			}
+
+		}
+		else{
+			found ++;
 		}
 	}
+	if(found===3){
+        for(var i=0;i<players.length;i++){
+            if(!players[i].PHONE_CONNECTED){
+                console.log("Found player not connected");
+                console.log(players[i]);
+
+
+                    console.log('match id');
+                    players[i].PHONE_CONNECTED = true;
+                    players[i].OK = true;
+                    socket.player = players[i];
+                    foundP = players[i];
+                playerIndexPhone++;
+
+                return  players[i];
+            }
+        }
+	}
+	console.log('not found');
+
 }
 
 function createPlayer(){
