@@ -246,7 +246,7 @@ function startFastFire(nbPlayer){
 
   var datas = [];
 
-  for(i = 0; i < nbPlayer; i++){
+  for(i = 0; i < nbPlayer.length; i++){
     datas[i]= [
       teams.slice(0,3),
       {'color': color.pop()}
@@ -254,7 +254,20 @@ function startFastFire(nbPlayer){
   }
 
   //TODO : send to client
+  for(j = 0; j < nbPlayer.length; j++){
+    nbPlayer.emit('FAST_GAME_FIRE', datas[j]);
+  }
 }
+
+function startSwitch(playerSocket){
+  playerSocket.emit('FAST_GAME_SWITCH');
+}
+
+function startMeteor(playerSocket){
+  playerSocket.emit('FAST_GAME_METEOR');
+}
+
+
 
 function findPlayer(id,socket){
 	var found = 0;
