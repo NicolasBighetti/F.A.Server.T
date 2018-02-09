@@ -179,8 +179,8 @@ io.sockets.on('connection', function (socket) {
 
 		}
 		else{
-			createPlayer();
-			var foundP = findPlayer(object.COLOR,socket);
+			//createPlayer();
+			var foundP = findPlayer(object.COLOR_START,socket);
 			// for(var i=0;i<players.length;i++){
 				// if(!players[i].PHONE_CONNECTED){
 					// console.log("Found player not connected");
@@ -205,6 +205,7 @@ io.sockets.on('connection', function (socket) {
 
 			console.log("ok");
 			socket.emit('FAST_PHONE_CONNECT', foundP);
+
 			console.log("ok2");
 			if(tableSocket!=null)
 				tableSocket.emit('FAST_PHONE_CONNECT', foundP);
@@ -274,12 +275,13 @@ function startMinigame(players){
 }
 
 
-function findPlayer(id,socket){
+function findPlayer(color,socket){
 	var found = 0;
 	for(var i=0;i<players.length;i++){
 		if(!players[i].PHONE_CONNECTED){
             console.log("Found player not connected");
             console.log(players[i]);
+            var id = 0;
 
             if(players[i].ATOM_PHONE_ID==id){
 				console.log('match id');
@@ -339,3 +341,19 @@ function getRandomInt(min, max) {
 }
 console.log('Listening to 8080');
 server.listen(8080);
+
+
+// server for opencv
+var net = require('net');
+var server2 = net.createServer(function(socket) {
+	console.log('someone connected');
+    socket.on('data', function (data) {
+    	console.log('data'+data);
+        // broadcast(socket.name + "> " + data, socket);
+    });
+    //socket.write('Echo server\r\n');
+    //socket.pipe(socket);
+});
+console.log('waiting for connect');
+
+server2.listen(4001, '10.212.115.16');
