@@ -139,6 +139,10 @@ io.sockets.on('connection', function (socket) {
 
 		socket.emit('connectTo', mess);
 	});
+  //P2P Pas p2p
+  socket.on('FAST_PRIVATE_SYNC', function(data){
+    socket.broadcast.emit('FAST_PRIVATE_SYNC', data);
+  });
 
 	// FAST Protocol
 	
