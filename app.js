@@ -335,7 +335,7 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 console.log('Listening to 8080');
-//server.listen(8080);
+server.listen(8080);
 
 
 // server for opencv
