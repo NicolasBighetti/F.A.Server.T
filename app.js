@@ -41,7 +41,7 @@ var tableSocket;
 var players = [];
 var playerIndex=0;
 var playerIndexPhone=0;
-
+var inFire=0;
 
 var colors = [{color:"#f4f142",text:"jaune"},
 {color:"#4286f4",text:"bleu"},
@@ -56,7 +56,7 @@ io.use(p2p);
 
 var clients = [];
 var portFast = 1000;
-
+var fireInProgree = true;
 function getIp(socket){
 	var address = socket.handshake.address;
 	return address.address;
@@ -113,6 +113,30 @@ io.sockets.on('connection', function (socket) {
 		console.log('Unlogin '+ socket.pseudo + ' ;mess ' + message);
 		disconnectClient(socket.pseudo);
     });
+    socket.on('ROOM',function (mess) {
+        for(var i=0;i<players.length;i++){
+            if(players.ATOM_PLAYER_ID===mess.TAG_ID){
+                if(fireInProgree&&mess.ROOM==='roomEmptyCB'){
+                    inFire++;
+                    if(inFire===4){
+
+                        startFastFire();
+
+                        var sock = [];
+                        for(var i =0;i<players.length;i++)
+                        {
+                            sock.add(players[i].socket);
+                        }
+                        startFastFire(players);
+                    }
+                }
+
+                break;
+            }
+        }
+        console.log('ROOOOOMMM PLayer not found :"(');
+            console.log('room'+mess);
+    });
 
 
         socket.on('FAST_EVENT_BROADCAST', function(data){
@@ -157,6 +181,12 @@ io.sockets.on('connection', function (socket) {
 		socket.emit('FAST_TABLE_CONNECT', tableID);
 	});
 
+    socket.on('FAST_FIRE_END',function(none){
+        tableSocket.emit('ROOM_FIRE',{ROOM:'roomEmpty',FIRE:false});
+
+
+    });
+
 	// FAST_COLOR
 	socket.on('FAST_COLOR',function(none){
 		console.log("FAST_COLOR");
@@ -180,7 +210,7 @@ io.sockets.on('connection', function (socket) {
 		}
 		else{
 			//createPlayer();
-			var foundP = findPlayer(object.COLOR_START,socket);
+			var foundP = findPlayer(object,socket);
 			// for(var i=0;i<players.length;i++){
 				// if(!players[i].PHONE_CONNECTED){
 					// console.log("Found player not connected");
@@ -203,17 +233,22 @@ io.sockets.on('connection', function (socket) {
 			}
 
 
-			console.log("ok");
-			socket.emit('FAST_PHONE_CONNECT', foundP);
+			console.log('ok');
+			//socket.emit('FAST_PHONE_CONNECT', foundP);
 
-			console.log("ok2");
-			if(tableSocket!=null)
-				tableSocket.emit('FAST_PHONE_CONNECT', foundP);
-			else
-				console.log("table not connected");
+			console.log('ok2');
+			//if(tableSocket!=null)
+				//tableSocket.emit('FAST_PHONE_CONNECT');
+			//else
+			//	console.log("table not connected");
 			if(playerIndexPhone===4){
-                if(tableSocket!=null)
-                    tableSocket.emit('FAST_PHONE_OK', foundP);
+                if(tableSocket!=null){
+                    tableSocket.emit('FAST_PHONE_OK', {});
+                    tableSocket.broadcast.emit('FAST_PHONE_OK', {});
+
+                    setTimeout(startDemoGames, 3000);
+
+                }
 
 			}
 			//socket.broadcast.emit('FAST_PHONE_CONNECT', foundP);
@@ -230,6 +265,12 @@ io.sockets.on('connection', function (socket) {
 
 });
 
+function startDemoGames(){
+    tableSocket.emit('ROOM_FIRE',{ROOM:'roomEmpty',FIRE:true});
+    fireInProgree=true;
+
+
+}
 function startFastFire(nbPlayer){
   var teams = [
     {FAST_GAME_FIRE_RED: getRandomInt(8,10)},
@@ -249,15 +290,18 @@ function startFastFire(nbPlayer){
 
   for(i = 0; i < nbPlayer.length; i++){
     datas[i]= [
-      teams.slice(0,3),
+      teams.slice(0,nbPlayer.length-1),
       {'color': color.pop()}
     ]
   }
 
   //TODO : send to client
   for(j = 0; j < nbPlayer.length; j++){
-    nbPlayer.emit('FAST_GAME_FIRE', datas[j]);
+    nbPlayer[j].emit('FAST_GAME_FIRE', datas[j]);
   }
+    for(j = 0; j < nbPlayer.length; j++){
+        nbPlayer[j].emit('FAST_PRIVATE_START', datas[j]);
+    }
 }
 
 function startSwitch(playerSocket){
@@ -276,13 +320,13 @@ function findPlayer(color,socket){
 		if(!players[i].PHONE_CONNECTED){
             console.log("Found player not connected");
             console.log(players[i]);
-            var id = 0;
+            var id = color;
 
             if(players[i].ATOM_PHONE_ID==id){
 				console.log('match id');
                 players[i].PHONE_CONNECTED = true;
                 players[i].OK = true;
-                socket.player = players[i];
+                //socket.player = players[i];
                 playerIndexPhone++;
                 return  players[i];
 
@@ -300,12 +344,13 @@ function findPlayer(color,socket){
         for(var i=0;i<players.length;i++){
             if(!players[i].PHONE_CONNECTED){
                 console.log("Found player not connected");
-                console.log(players[i]);
+                //console.log(players[i]);
 
 
                     console.log('match id');
                     players[i].PHONE_CONNECTED = true;
                     players[i].OK = true;
+                    players[i].socket = socket;
                     socket.player = players[i];
                     foundP = players[i];
                 playerIndexPhone++;
@@ -344,6 +389,8 @@ var server2 = net.createServer(function(socket) {
 	console.log('someone connected');
     socket.on('data', function (data) {
     	console.log('data'+data);
+        tableSocket.broadcast.emit('FAST_GAME_BALISTIC', data);
+
         // broadcast(socket.name + "> " + data, socket);
     });
     //socket.write('Echo server\r\n');
@@ -351,4 +398,4 @@ var server2 = net.createServer(function(socket) {
 });
 console.log('waiting for connect');
 
-server2.listen(4001, '10.212.115.16');
+server2.listen(4001, '192.168.1.25');
