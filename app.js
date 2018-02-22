@@ -204,6 +204,12 @@ io.sockets.on('connection', function (socket) {
 
 	});
 
+    socket.on('FIRE_WEAPON',function(value){
+        console.log("FIRE_WEAPON");
+        socket.broadcast.emit('FIRE_WEAPON', value.PREC);
+
+    });
+
 	socket.on('FAST_PHONE_CONNECT',function(object){
 		console.log('FAST_PHONE_CONNECT');
 		console.log(object);
@@ -275,7 +281,7 @@ io.sockets.on('connection', function (socket) {
 
 	socket.on('FAST_EMIT',function (ok) {
         //tableSocket.emit(ok.key,ok.data);
-        tableSocket.emit(ok.key,{pos:ok.data.room,FIRE:ok.data.FIRE});
+        tableSocket.emit(ok.key,ok.data);
 		console.dir(ok);
 
    })
@@ -403,6 +409,7 @@ var server2 = net.createServer(function(socket) {
     socket.on('data', function (data) {
     	console.log('data'+data);
         tableSocket.broadcast.emit('FAST_GAME_BALISTIC', data);
+        tableSocket.emit('FIRE_WEAPON', data);
 
         // broadcast(socket.name + "> " + data, socket);
     });

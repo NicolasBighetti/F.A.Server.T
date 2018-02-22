@@ -20,12 +20,15 @@
         <option value="FAST_GAME_METEOR">FAST_GAME_METEOR</option>
         <option value="FAST_GAME_SWITCH">FAST_GAME_SWITCH</option>
         <option value="FAST_GAME_BALLISTIC">FAST_GAME_BALLISTIC</option>
+        <option value="FIRE_WEAPON">FIRE_WEAPON</option>
+
     </select>
 </p>
 <p >Select room:<input id="room" type="range" min="0" max="11"> </p>
 <p>Activate?<input id="activate" type="checkbox"></p>
 <p>Params:</p>
 <p>Players:</p>
+<p >Select precision:<input id="prec" type="range" min="0" max="100"> </p>
 
 <button >Init</button>
 <button onclick="sendFAST_GAME_FIRE()">ToTable</button>
@@ -46,8 +49,9 @@
         var roomId = document.getElementById('room').value;
         var key = document.getElementById('key').value;
         var activate = document.getElementById('activate').checked;
+        var prec = document.getElementById('prec').value;
 
-        var game =  {room:roomId,FIRE:activate};
+        var game =  {ROOM:roomId,FIRE:activate,PREC:prec};
         var toSend = {key:key,data:game};
         console.dir(toSend);
         socket.emit('FAST_EMIT',toSend);
