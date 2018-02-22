@@ -41,7 +41,6 @@ var tableSocket;
 var players = [];
 var playerIndex=0;
 var playerIndexPhone=0;
-var inFire=0;
 
 var colors = [{color:"#f4f142",text:"jaune"},
 {color:"#4286f4",text:"bleu"},
@@ -56,7 +55,8 @@ io.use(p2p);
 
 var clients = [];
 var portFast = 1000;
-var fireInProgree = true;
+var rooms = [];
+
 function getIp(socket){
 	var address = socket.handshake.address;
 	return address.address;
@@ -113,14 +113,17 @@ io.sockets.on('connection', function (socket) {
 		console.log('Unlogin '+ socket.pseudo + ' ;mess ' + message);
 		disconnectClient(socket.pseudo);
     });
+
+	//room exchange
     socket.on('ROOM',function (mess) {
+
         for(var i=0;i<players.length;i++){
             if(players.ATOM_PLAYER_ID===mess.TAG_ID){
                 if(fireInProgree&&mess.ROOM==='roomEmptyCB'){
-                    inFire++;
+
                     if(inFire===4){
 
-                        startFastFire();
+                        //startFastFire();
 
                         var sock = [];
                         for(var i =0;i<players.length;i++)
@@ -135,23 +138,31 @@ io.sockets.on('connection', function (socket) {
             }
         }
         console.log('ROOOOOMMM PLayer not found :"(');
-            console.log('room'+mess);
+            console.log('room');
+            console.dir(mess);
     });
 
 
+    socket.on('FAST_PHONE_OK', function(data){
+    	console.log('FPO');
+        socket.broadcast.emit('FAST_PHONE_OK', data);
+    });
+
         socket.on('FAST_EVENT_BROADCAST', function(data){
             socket.broadcast.emit('FAST_EVENT_BROADCAST', data);
-        })
+        });
 
 	socket.on('disconnect', function (message) {
 		console.log('disconnect '+ socket.pseudo + ' ;mess ' +message);
 
 		disconnectClient(socket.pseudo);
     });
+
 	socket.on('peer-obj', function (message) {
 		console.log('peer ' + message);
 		disconnectClient(socket.pseudo);
     });
+
 	socket.on('connectTo',function(pseudo){
 		console.log(socket.pseudo + ' asked to connect to'  + pseudo);
 		if(clients[pseudo]==null){
@@ -181,10 +192,9 @@ io.sockets.on('connection', function (socket) {
 		socket.emit('FAST_TABLE_CONNECT', tableID);
 	});
 
-    socket.on('FAST_FIRE_END',function(none){
-        tableSocket.emit('ROOM_FIRE',{ROOM:'roomEmpty',FIRE:false});
+    socket.on('FAST_GAME_END',function(none){
 
-
+        tableSocket.emit('ROOM_EVENT',{GAME:none.GAME,ROOM:none.ROOM,FIRE:false});
     });
 
 	// FAST_COLOR
@@ -263,26 +273,20 @@ io.sockets.on('connection', function (socket) {
 	});
   //Mini Game and some stuff
 
+	socket.on('FAST_EMIT',function (ok) {
+        //tableSocket.emit(ok.key,ok.data);
+        tableSocket.emit(ok.key,{pos:ok.data.room,FIRE:ok.data.FIRE});
+		console.dir(ok);
+
+   })
 });
 
-function startDemoGames(){
-    tableSocket.emit('ROOM_FIRE',{ROOM:'roomEmpty',FIRE:true});
-    fireInProgree=true;
-
-
-}
 function startFastFire(nbPlayer){
   var teams = [
-    {FAST_GAME_FIRE_RED: getRandomInt(8,10)},
-    {FAST_GAME_FIRE_BLUE: getRandomInt(8,10)},
-    {FAST_GAME_FIRE_GREEN: getRandomInt(8,10)},
-    {FAST_GAME_FIRE_PURPLE: getRandomInt(8,10)}
+    {FAST_GAME_FIRE_RED: getRandomInt(8,10)}
   ];
 
   var color = [
-    'purple',
-    'green',
-    'blue',
     'red'
   ];
 
@@ -297,10 +301,15 @@ function startFastFire(nbPlayer){
 
   //TODO : send to client
   for(j = 0; j < nbPlayer.length; j++){
-    nbPlayer[j].emit('FAST_GAME_FIRE', datas[j]);
+      var al = {
+          DATA:datas[j],
+          GAME:'FAST_GAME_FIRE',
+		  ROOM:2
+      };
+    nbPlayer[j].emit('FAST_GAME_INIT', al);
   }
     for(j = 0; j < nbPlayer.length; j++){
-        nbPlayer[j].emit('FAST_PRIVATE_START', datas[j]);
+        nbPlayer[j].emit('FAST_GAME_START');
     }
 }
 
@@ -317,7 +326,6 @@ function startMinigame(players){
     players[i].emit('FAST_PRIVATE_START');
   }
 }
-
 
 function findPlayer(color,socket){
 	var found = 0;
@@ -373,7 +381,7 @@ function createPlayer(){
 			ATOM_PHONE_ID: 20,
 			ATOM_PLAYER_ID: playerIndex,
 			PHONE_CONNECTED: false
-	}
+	};
 	object.PLAYER_ID = playerIndex++;
 	object.COLOR = colors[object.PLAYER_ID%colors.length];
 	console.log("created player");
@@ -403,4 +411,4 @@ var server2 = net.createServer(function(socket) {
 });
 console.log('waiting for connect');
 
-server2.listen(4001, '192.168.1.25');
+//server2.listen(4001, '');
