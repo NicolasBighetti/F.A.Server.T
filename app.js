@@ -340,7 +340,8 @@ function startFastFire(nbPlayer){
       var al = {
           DATA:datas[j],
           GAME:'FAST_GAME_FIRE',
-		  ROOM:2
+          isDemo: false,
+		      ROOM:2
       };
     nbPlayer[j].emit('FAST_GAME_INIT', al);
   }
