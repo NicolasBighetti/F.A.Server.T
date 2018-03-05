@@ -19,6 +19,9 @@ Pour lancer le projet, déplacez vous dans le dossier ou le projet a été insta
 
 Le serveur est à présent lancé sur le port 8080  
 
+## Spécifications du projet  
+https://docs.google.com/document/d/1FWADMczN9g2uVyr7bRIQOU0Bd298s5VFPcLsCtjj-Po/edit#
+
 # Contributeurs
 Alison BERLIOZ
 Nicolas BIGHETTI
